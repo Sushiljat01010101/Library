@@ -8,8 +8,8 @@ class StorageManager {
     initializeDefaultUser() {
         if (!localStorage.getItem('libraryUser')) {
             const defaultUser = {
-                username: 'admin',
-                password: 'admin123',
+                username: '1',
+                password: '1',
                 name: 'Administrator'
             };
             localStorage.setItem('libraryUser', JSON.stringify(defaultUser));
