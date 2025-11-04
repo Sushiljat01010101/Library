@@ -41,31 +41,52 @@ function loadSeats() {
     });
     
     const container = document.getElementById('seatsGrid');
+    container.textContent = '';
     
     if (filtered.length === 0) {
-        container.innerHTML = '<p class="no-data">No seats found. Click "Initialize Seats" to set up the seating arrangement.</p>';
+        const noDataMsg = document.createElement('p');
+        noDataMsg.className = 'no-data';
+        noDataMsg.textContent = 'No seats found. Click "Initialize Seats" to set up the seating arrangement.';
+        container.appendChild(noDataMsg);
         updateStats();
         return;
     }
     
-    container.innerHTML = filtered.map(seat => {
+    filtered.forEach(seat => {
         const icon = seat.status === 'occupied' ? '👤' : 
                      seat.status === 'reserved' ? '🔒' : '🪑';
         
         const statusText = seat.status.charAt(0).toUpperCase() + seat.status.slice(1);
         
-        const memberInfo = seat.memberName ? 
-            `<div class="seat-member">${seat.memberName}</div>` : '';
+        const seatCard = document.createElement('div');
+        seatCard.className = 'seat-card ' + seat.status;
+        seatCard.addEventListener('click', () => handleSeatClick(seat.id, seat.status));
         
-        return `
-            <div class="seat-card ${seat.status}" onclick="handleSeatClick('${seat.id}', '${seat.status}')">
-                <div class="seat-icon">${icon}</div>
-                <div class="seat-number">${seat.id}</div>
-                <span class="seat-status ${seat.status}">${statusText}</span>
-                ${memberInfo}
-            </div>
-        `;
-    }).join('');
+        const seatIcon = document.createElement('div');
+        seatIcon.className = 'seat-icon';
+        seatIcon.textContent = icon;
+        
+        const seatNumber = document.createElement('div');
+        seatNumber.className = 'seat-number';
+        seatNumber.textContent = seat.id;
+        
+        const seatStatus = document.createElement('span');
+        seatStatus.className = 'seat-status ' + seat.status;
+        seatStatus.textContent = statusText;
+        
+        seatCard.appendChild(seatIcon);
+        seatCard.appendChild(seatNumber);
+        seatCard.appendChild(seatStatus);
+        
+        if (seat.memberName) {
+            const memberInfo = document.createElement('div');
+            memberInfo.className = 'seat-member';
+            memberInfo.textContent = seat.memberName;
+            seatCard.appendChild(memberInfo);
+        }
+        
+        container.appendChild(seatCard);
+    });
     
     updateStats();
 }
@@ -113,10 +134,19 @@ function showAssignModal(seatId) {
     const availableMembers = members.filter(m => !occupiedMemberIds.includes(m.id));
     
     const select = document.getElementById('assignMember');
-    select.innerHTML = '<option value="">-- Select Member --</option>' + 
-        availableMembers.map(m => 
-            `<option value="${m.id}">${m.name} (Seat: ${m.seat || 'Not Assigned'})</option>`
-        ).join('');
+    select.textContent = '';
+    
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = '-- Select Member --';
+    select.appendChild(defaultOption);
+    
+    availableMembers.forEach(m => {
+        const option = document.createElement('option');
+        option.value = m.id;
+        option.textContent = `${m.name} (Seat: ${m.seat || 'Not Assigned'})`;
+        select.appendChild(option);
+    });
     
     showModal('assignModal');
 }
@@ -127,14 +157,16 @@ function showSeatDetail(seatId) {
     
     if (seat) {
         document.getElementById('detailSeatNumber').textContent = seat.id;
-        document.getElementById('detailStatus').textContent = 
-            `<span class="seat-status ${seat.status}">${seat.status.toUpperCase()}</span>`;
         document.getElementById('detailMemberName').textContent = seat.memberName || '-';
         document.getElementById('detailAssignedDate').textContent = 
             seat.assignedDate ? storageManager.formatDate(seat.assignedDate) : '-';
         
-        document.getElementById('detailStatus').innerHTML = 
-            `<span class="seat-status ${seat.status}">${seat.status.toUpperCase()}</span>`;
+        const statusContainer = document.getElementById('detailStatus');
+        statusContainer.textContent = '';
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'seat-status ' + seat.status;
+        statusSpan.textContent = seat.status.toUpperCase();
+        statusContainer.appendChild(statusSpan);
         
         showModal('seatDetailModal');
     }
