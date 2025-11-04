@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Library Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="mobile-header">
+        <div class="mobile-header-content">
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            <div class="mobile-library-name">📚 Library MS</div>
+        </div>
+    </div>
+    
+    <div class="menu-overlay" id="menuOverlay"></div>
+    
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">📚 Library MS</div>
+                <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="icon">📊</span>
+                    <span class="text">Dashboard</span>
+                </a>
+                <a href="members.html" class="nav-item">
+                    <span class="icon">👥</span>
+                    <span class="text">Members</span>
+                </a>
+                <a href="seats.html" class="nav-item">
+                    <span class="icon">🪑</span>
+                    <span class="text">Seats</span>
+                </a>
+                <a href="books.html" class="nav-item">
+                    <span class="icon">📚</span>
+                    <span class="text">Books</span>
+                </a>
+                <a href="fees.html" class="nav-item">
+                    <span class="icon">💰</span>
+                    <span class="text">Fees</span>
+                </a>
+                <a href="receipts.html" class="nav-item">
+                    <span class="icon">🧾</span>
+                    <span class="text">Payment Receipts</span>
+                </a>
+                <a href="expenses.html" class="nav-item">
+                    <span class="icon">💸</span>
+                    <span class="text">Expenses</span>
+                </a>
+                <a href="reports.html" class="nav-item">
+                    <span class="icon">📈</span>
+                    <span class="text">Reports</span>
+                </a>
+                <a href="activity.html" class="nav-item">
+                    <span class="icon">📋</span>
+                    <span class="text">Activity Log</span>
+                </a>
+                <a href="settings.html" class="nav-item active">
+                    <span class="icon">⚙️</span>
+                    <span class="text">Settings</span>
+                </a>
+                <a href="#" class="nav-item logout-btn" id="logoutBtn">
+                    <span class="icon">🚪</span>
+                    <span class="text">Logout</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <header class="page-header">
+                <div class="header-left">
+                    <h1>Settings & Backup</h1>
+                    <p class="subtitle">Manage system settings and data</p>
+                </div>
+            </header>
+            
+            <div class="page-content">
+                <div class="settings-section">
+                    <h2>🎨 Appearance Preferences</h2>
+                    <div class="appearance-controls">
+                        <div class="preference-card">
+                            <div class="preference-header">
+                                <div>
+                                    <h3>Theme Mode</h3>
+                                    <p>Choose between light and dark mode</p>
+                                </div>
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="themeToggle">
+                                    <span class="theme-slider">
+                                        <span class="theme-icon-sun">☀️</span>
+                                        <span class="theme-icon-moon">🌙</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>Library Settings</h2>
+                    <form id="settingsForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="libraryName">Library Name</label>
+                                <input type="text" id="libraryName" value="My Library">
+                            </div>
+                            <div class="form-group">
+                                <label for="totalSeats">Total Seats</label>
+                                <input type="number" id="totalSeats" value="50" min="1">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="defaultFine">Default Fine per Day (₹)</label>
+                                <input type="number" id="defaultFine" value="5" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="bookReturnDays">Default Book Return Days</label>
+                                <input type="number" id="bookReturnDays" value="14" min="1">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">Save Settings</button>
+                    </form>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>Change Password</h2>
+                    <form id="passwordForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" required minlength="6">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Update Password</button>
+                    </form>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>📱 Telegram Notifications</h2>
+                    <p class="subtitle" style="margin-bottom: 20px; color: var(--text-secondary);">Receive real-time notifications on Telegram for member and payment activities</p>
+                    <form id="telegramForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="telegramBotToken">Telegram Bot Token</label>
+                                <input type="text" id="telegramBotToken" placeholder="Enter your bot token (e.g., 123456789:ABCdefGHIjklMNOpqrsTUVwxyz)">
+                                <small class="form-hint">Create a bot using @BotFather on Telegram to get the token</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="telegramChatId">Telegram Chat ID</label>
+                                <input type="text" id="telegramChatId" placeholder="Enter your chat ID (e.g., 123456789)">
+                                <small class="form-hint">Use @userinfobot on Telegram to get your chat ID</small>
+                            </div>
+                        </div>
+                        <div class="telegram-status" id="telegramStatus" style="display: none; margin-bottom: 15px;">
+                            <p class="status-message"></p>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="btn-primary">Save Telegram Settings</button>
+                            <button type="button" class="btn-secondary" id="testTelegramBtn">Test Notification</button>
+                        </div>
+                    </form>
+                    <div class="telegram-info" style="margin-top: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid var(--primary-gold);">
+                        <h4 style="margin-bottom: 10px; color: var(--text-primary);">📖 How to Setup:</h4>
+                        <ol style="margin: 0; padding-left: 20px; color: var(--text-secondary); line-height: 1.8;">
+                            <li>Open Telegram and search for <strong>@BotFather</strong></li>
+                            <li>Send <code>/newbot</code> and follow instructions to create your bot</li>
+                            <li>Copy the <strong>Bot Token</strong> provided by BotFather</li>
+                            <li>Search for <strong>@userinfobot</strong> on Telegram</li>
+                            <li>Send any message to get your <strong>Chat ID</strong></li>
+                            <li>Enter both values above and click "Save Telegram Settings"</li>
+                            <li>Click "Test Notification" to verify the setup</li>
+                        </ol>
+                        <p style="margin-top: 15px; color: var(--text-muted); font-size: 14px;">
+                            <strong>Note:</strong> You'll receive notifications when members are added/edited/deleted and when payments are recorded/updated/deleted.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>⏰ Auto Backup Settings</h2>
+                    <div class="auto-backup-controls">
+                        <div class="preference-card">
+                            <div class="preference-header">
+                                <div>
+                                    <h3>Enable Auto Backup</h3>
+                                    <p>Automatically backup your data at regular intervals</p>
+                                </div>
+                                <label class="theme-switch">
+                                    <input type="checkbox" id="autoBackupToggle">
+                                    <span class="theme-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="backup-frequency" id="backupFrequencySection" style="display: none;">
+                            <div class="form-group">
+                                <label for="backupInterval">Backup Frequency</label>
+                                <select id="backupInterval" class="backup-select">
+                                    <option value="daily">Daily (Every 24 hours)</option>
+                                    <option value="weekly">Weekly (Every 7 days)</option>
+                                    <option value="monthly">Monthly (Every 30 days)</option>
+                                    <option value="custom">Custom Schedule</option>
+                                </select>
+                            </div>
+                            
+                            <div class="custom-schedule" id="customScheduleSection" style="display: none; margin-top: 15px;">
+                                <h4 style="margin-bottom: 15px; color: var(--text-primary);">📅 Custom Backup Schedule</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="backupDate">Backup Date</label>
+                                        <input type="date" id="backupDate" class="backup-select">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="backupTime">Backup Time</label>
+                                        <input type="time" id="backupTime" class="backup-select">
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-primary" id="scheduleBackupBtn">Schedule Backup</button>
+                            </div>
+                            
+                            <div class="backup-info">
+                                <p>Last Auto Backup: <strong id="lastBackupTime">Never</strong></p>
+                                <p>Next Scheduled Backup: <strong id="nextBackupTime">-</strong></p>
+                            </div>
+                            
+                            <div class="telegram-backup-toggle" style="margin-top: 15px;">
+                                <div class="preference-card">
+                                    <div class="preference-header">
+                                        <div>
+                                            <h4>Send Backups to Telegram</h4>
+                                            <p style="font-size: 14px; color: var(--text-secondary);">Automatically send backup files to Telegram when auto backup runs</p>
+                                        </div>
+                                        <label class="theme-switch">
+                                            <input type="checkbox" id="telegramBackupToggle">
+                                            <span class="theme-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>Data Backup & Restore</h2>
+                    <div class="backup-controls">
+                        <div class="backup-card">
+                            <h3>📥 Export Data</h3>
+                            <p>Download all library data as a JSON file for backup</p>
+                            <button class="btn-primary" id="exportDataBtn">Export Backup</button>
+                        </div>
+                        
+                        <div class="backup-card">
+                            <h3>📤 Import Data</h3>
+                            <p>Restore library data from a backup file</p>
+                            <input type="file" id="importFile" accept=".json" style="display: none;">
+                            <button class="btn-secondary" id="importDataBtn">Import Backup</button>
+                        </div>
+                        
+                        <div class="backup-card danger">
+                            <h3>🗑️ Clear All Data</h3>
+                            <p>Permanently delete all library data (cannot be undone)</p>
+                            <button class="btn-danger" id="clearAllDataBtn">Clear All Data</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>🪑 Seat Management</h2>
+                    <p class="subtitle" style="margin-bottom: 20px; color: var(--text-secondary);">Dynamically add or remove seats from your library</p>
+                    
+                    <div class="seat-management-controls">
+                        <div class="seat-stats-row">
+                            <div class="seat-stat-card">
+                                <div class="stat-label">Current Total Seats</div>
+                                <div class="stat-value" id="currentTotalSeats">0</div>
+                            </div>
+                            <div class="seat-stat-card available">
+                                <div class="stat-label">Available Seats</div>
+                                <div class="stat-value" id="currentAvailableSeats">0</div>
+                            </div>
+                            <div class="seat-stat-card occupied">
+                                <div class="stat-label">Occupied Seats</div>
+                                <div class="stat-value" id="currentOccupiedSeats">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="seat-action-cards">
+                            <div class="action-card">
+                                <h3>➕ Add Seats</h3>
+                                <p>Add new seats to your library</p>
+                                <div class="action-controls">
+                                    <input type="number" id="seatsToAdd" placeholder="Number of seats" min="1" value="1">
+                                    <button class="btn-primary" id="addSeatsBtn">Add Seats</button>
+                                </div>
+                            </div>
+                            
+                            <div class="action-card">
+                                <h3>➖ Remove Seats</h3>
+                                <p>Remove trailing available seats from the end (occupied seats cannot be removed)</p>
+                                <div class="action-controls">
+                                    <input type="number" id="seatsToRemove" placeholder="Number of seats" min="1" value="1">
+                                    <button class="btn-danger" id="removeSeatsBtn">Remove Seats</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bulk-action-card">
+                            <h3>🔄 Set Exact Seat Count</h3>
+                            <p>Set the total number of seats (will add or remove as needed)</p>
+                            <div class="action-controls">
+                                <input type="number" id="exactSeatCount" placeholder="Exact number of seats" min="1">
+                                <button class="btn-secondary" id="setExactSeatsBtn">Set Seat Count</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h2>System Information</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span>Total Members</span>
+                            <strong id="infoMembers">0</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Total Books</span>
+                            <strong id="infoBooks">0</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Fee Records</span>
+                            <strong id="infoFees">0</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Expense Records</span>
+                            <strong id="infoExpenses">0</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Activity Logs</span>
+                            <strong id="infoActivities">0</strong>
+                        </div>
+                        <div class="info-item">
+                            <span>Storage Used</span>
+                            <strong id="infoStorage">0 KB</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/storage.js"></script>
+    <script src="js/telegram.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        storageManager.checkAuth();
+        
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Are you sure you want to logout?')) {
+                storageManager.logout();
+            }
+        });
+        
+        const preferences = storageManager.getPreferences();
+        const themeToggle = document.getElementById('themeToggle');
+        const autoBackupToggle = document.getElementById('autoBackupToggle');
+        const backupFrequencySection = document.getElementById('backupFrequencySection');
+        const backupInterval = document.getElementById('backupInterval');
+        
+        themeToggle.checked = preferences.theme === 'light';
+        
+        themeToggle.addEventListener('change', (e) => {
+            const newTheme = e.target.checked ? 'light' : 'dark';
+            storageManager.setTheme(newTheme);
+        });
+        
+        autoBackupToggle.checked = preferences.autoBackup || false;
+        backupInterval.value = preferences.backupInterval || 'weekly';
+        
+        if (preferences.autoBackup) {
+            backupFrequencySection.style.display = 'block';
+            
+            if (preferences.backupInterval === 'custom') {
+                document.getElementById('customScheduleSection').style.display = 'block';
+            }
+        }
+        
+        function formatDateTime(isoString) {
+            if (!isoString) return 'Never';
+            const date = new Date(isoString);
+            return date.toLocaleString('en-IN', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        document.getElementById('lastBackupTime').textContent = formatDateTime(preferences.lastBackupTime);
+        document.getElementById('nextBackupTime').textContent = 
+            preferences.autoBackup && preferences.nextBackupTime ? formatDateTime(preferences.nextBackupTime) : '-';
+        
+        autoBackupToggle.addEventListener('change', (e) => {
+            const isEnabled = e.target.checked;
+            const prefs = storageManager.getPreferences();
+            prefs.autoBackup = isEnabled;
+            
+            if (isEnabled) {
+                backupFrequencySection.style.display = 'block';
+                prefs.nextBackupTime = storageManager.calculateNextBackupTime(prefs.backupInterval);
+                document.getElementById('nextBackupTime').textContent = formatDateTime(prefs.nextBackupTime);
+            } else {
+                backupFrequencySection.style.display = 'none';
+                prefs.nextBackupTime = null;
+                document.getElementById('nextBackupTime').textContent = '-';
+            }
+            
+            storageManager.savePreferences(prefs);
+        });
+        
+        backupInterval.addEventListener('change', (e) => {
+            const prefs = storageManager.getPreferences();
+            prefs.backupInterval = e.target.value;
+            
+            const customScheduleSection = document.getElementById('customScheduleSection');
+            if (e.target.value === 'custom') {
+                customScheduleSection.style.display = 'block';
+                document.getElementById('nextBackupTime').textContent = prefs.customBackupTime ? formatDateTime(prefs.customBackupTime) : 'Not Scheduled';
+            } else {
+                customScheduleSection.style.display = 'none';
+                prefs.nextBackupTime = storageManager.calculateNextBackupTime(e.target.value);
+                document.getElementById('nextBackupTime').textContent = formatDateTime(prefs.nextBackupTime);
+            }
+            
+            storageManager.savePreferences(prefs);
+        });
+        
+        document.getElementById('scheduleBackupBtn').addEventListener('click', () => {
+            const backupDate = document.getElementById('backupDate').value;
+            const backupTime = document.getElementById('backupTime').value;
+            
+            if (!backupDate || !backupTime) {
+                alert('Please select both date and time for the backup');
+                return;
+            }
+            
+            const scheduledDateTime = new Date(`${backupDate}T${backupTime}`);
+            const now = new Date();
+            
+            if (scheduledDateTime <= now) {
+                alert('Please select a future date and time');
+                return;
+            }
+            
+            const prefs = storageManager.getPreferences();
+            prefs.customBackupTime = scheduledDateTime.toISOString();
+            prefs.nextBackupTime = prefs.customBackupTime;
+            storageManager.savePreferences(prefs);
+            
+            document.getElementById('nextBackupTime').textContent = formatDateTime(prefs.customBackupTime);
+            alert(`Backup scheduled for ${scheduledDateTime.toLocaleString('en-IN')}`);
+        });
+        
+        const telegramBackupToggle = document.getElementById('telegramBackupToggle');
+        const prefs = storageManager.getPreferences();
+        telegramBackupToggle.checked = prefs.sendBackupToTelegram || false;
+        
+        telegramBackupToggle.addEventListener('change', (e) => {
+            const prefs = storageManager.getPreferences();
+            prefs.sendBackupToTelegram = e.target.checked;
+            storageManager.savePreferences(prefs);
+        });
+        
+        const settingsForm = document.getElementById('settingsForm');
+        const passwordForm = document.getElementById('passwordForm');
+        
+        const settings = storageManager.getSettings();
+        if (settings) {
+            document.getElementById('libraryName').value = settings.libraryName || 'My Library';
+            document.getElementById('totalSeats').value = settings.totalSeats || 50;
+            document.getElementById('defaultFine').value = settings.defaultFine || 5;
+            document.getElementById('bookReturnDays').value = settings.bookReturnDays || 14;
+        }
+        
+        settingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const currentSettings = storageManager.getSettings();
+            const newTotalSeats = parseInt(document.getElementById('totalSeats').value);
+            const oldTotalSeats = currentSettings.totalSeats;
+            
+            let libraryName = document.getElementById('libraryName').value.trim();
+            if (libraryName.length === 0) {
+                alert('Library name cannot be empty!');
+                return;
+            }
+            
+            if (libraryName.length > 100) {
+                alert('Library name is too long! Please keep it under 100 characters.');
+                return;
+            }
+            
+            const newSettings = {
+                libraryName: libraryName,
+                totalSeats: newTotalSeats,
+                defaultFine: parseInt(document.getElementById('defaultFine').value),
+                bookReturnDays: parseInt(document.getElementById('bookReturnDays').value)
+            };
+            
+            if (newTotalSeats !== oldTotalSeats) {
+                const stats = storageManager.getSeatStats();
+                const currentTotal = stats.total;
+                const difference = newTotalSeats - currentTotal;
+                
+                if (difference > 0) {
+                    if (confirm(`This will add ${difference} new seat(s) to match the total seats setting. Continue?`)) {
+                        const result = storageManager.setExactSeatCount(newTotalSeats);
+                        if (result.success) {
+                            storageManager.saveSettings(newSettings);
+                            alert(`Settings saved! ${difference} seat(s) added. New total: ${result.newTotal}`);
+                            updateSeatStats();
+                        } else {
+                            alert('Failed to update seats');
+                            return;
+                        }
+                    } else {
+                        document.getElementById('totalSeats').value = oldTotalSeats;
+                        return;
+                    }
+                } else if (difference < 0) {
+                    const seatsToRemove = Math.abs(difference);
+                    if (seatsToRemove > stats.available) {
+                        alert(`Cannot reduce to ${newTotalSeats} seats. This requires removing ${seatsToRemove} seats, but only ${stats.available} are available.\n${stats.occupied} seats are occupied and cannot be removed.\n\nPlease free up some seats first or use the Seat Management section below.`);
+                        document.getElementById('totalSeats').value = oldTotalSeats;
+                        return;
+                    }
+                    
+                    if (confirm(`This will remove ${seatsToRemove} seat(s) to match the total seats setting. Continue?`)) {
+                        const result = storageManager.setExactSeatCount(newTotalSeats);
+                        if (result.success) {
+                            storageManager.saveSettings(newSettings);
+                            alert(`Settings saved! ${seatsToRemove} seat(s) removed. New total: ${result.newTotal}`);
+                            updateSeatStats();
+                        } else {
+                            alert(result.message || 'Failed to update seats');
+                            document.getElementById('totalSeats').value = oldTotalSeats;
+                            return;
+                        }
+                    } else {
+                        document.getElementById('totalSeats').value = oldTotalSeats;
+                        return;
+                    }
+                } else {
+                    storageManager.saveSettings(newSettings);
+                    alert('Settings saved successfully!');
+                }
+            } else {
+                storageManager.saveSettings(newSettings);
+                alert('Settings saved successfully!');
+            }
+            
+            if (typeof updateLibraryName === 'function') {
+                updateLibraryName();
+            }
+        });
+        
+        passwordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            const user = storageManager.getUser();
+            if (user.password !== current) {
+                alert('Current password is incorrect!');
+                return;
+            }
+            
+            if (newPass !== confirm) {
+                alert('New passwords do not match!');
+                return;
+            }
+            
+            user.password = newPass;
+            localStorage.setItem('libraryUser', JSON.stringify(user));
+            alert('Password updated successfully!');
+            passwordForm.reset();
+        });
+        
+        const telegramForm = document.getElementById('telegramForm');
+        const telegramBotToken = document.getElementById('telegramBotToken');
+        const telegramChatId = document.getElementById('telegramChatId');
+        const telegramStatus = document.getElementById('telegramStatus');
+        
+        const currentSettings = storageManager.getSettings();
+        if (currentSettings.telegramBotToken) {
+            telegramBotToken.value = currentSettings.telegramBotToken;
+        }
+        if (currentSettings.telegramChatId) {
+            telegramChatId.value = currentSettings.telegramChatId;
+        }
+        
+        function showTelegramStatus(message, isError = false) {
+            const statusMessage = telegramStatus.querySelector('.status-message');
+            statusMessage.textContent = message;
+            telegramStatus.style.display = 'block';
+            telegramStatus.style.padding = '12px';
+            telegramStatus.style.borderRadius = '8px';
+            telegramStatus.style.border = `1px solid ${isError ? '#dc3545' : '#28a745'}`;
+            telegramStatus.style.background = isError ? 'rgba(220, 53, 69, 0.1)' : 'rgba(40, 167, 69, 0.1)';
+            statusMessage.style.color = isError ? '#dc3545' : '#28a745';
+            statusMessage.style.margin = '0';
+        }
+        
+        telegramForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const botToken = telegramBotToken.value.trim();
+            const chatId = telegramChatId.value.trim();
+            
+            const settings = storageManager.getSettings();
+            settings.telegramBotToken = botToken;
+            settings.telegramChatId = chatId;
+            
+            storageManager.saveSettings(settings);
+            
+            if (botToken && chatId) {
+                showTelegramStatus('✅ Telegram settings saved successfully! You will now receive notifications.', false);
+            } else {
+                showTelegramStatus('⚠️ Settings saved, but notifications are disabled (missing token or chat ID).', true);
+            }
+            
+            setTimeout(() => {
+                telegramStatus.style.display = 'none';
+            }, 5000);
+        });
+        
+        document.getElementById('testTelegramBtn').addEventListener('click', async () => {
+            const botToken = telegramBotToken.value.trim();
+            const chatId = telegramChatId.value.trim();
+            
+            if (!botToken || !chatId) {
+                showTelegramStatus('❌ Please enter both Bot Token and Chat ID before testing.', true);
+                return;
+            }
+            
+            const settings = storageManager.getSettings();
+            const libraryName = settings.libraryName || 'Library Management System';
+            
+            const testMessage = `🎉 <b>Test Notification</b>\n\n📚 <b>${libraryName}</b>\n━━━━━━━━━━━━━━━━━━\n\n✅ Telegram notifications are working correctly!\n\n⏰ <i>${new Date().toLocaleString('en-IN')}</i>`;
+            
+            const testBtn = document.getElementById('testTelegramBtn');
+            testBtn.disabled = true;
+            testBtn.textContent = 'Sending...';
+            
+            try {
+                const result = await telegramNotifier.sendMessage(testMessage);
+                
+                if (result.success) {
+                    showTelegramStatus('✅ Test notification sent successfully! Check your Telegram.', false);
+                } else {
+                    showTelegramStatus(`❌ Failed to send notification: ${result.error || 'Unknown error'}`, true);
+                }
+            } catch (error) {
+                showTelegramStatus(`❌ Error: ${error.message}`, true);
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = 'Test Notification';
+            }
+        });
+        
+        document.getElementById('exportDataBtn').addEventListener('click', async () => {
+            const data = {
+                members: storageManager.getMembers(),
+                books: storageManager.getBooks(),
+                issuedBooks: storageManager.getIssuedBooks(),
+                fees: storageManager.getFees(),
+                expenses: storageManager.getExpenses(),
+                activities: storageManager.getActivities(),
+                seats: storageManager.getSeats(),
+                settings: storageManager.getSettings(),
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const filename = `library-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            storageManager.addActivity('Data exported successfully', 'system');
+            
+            if (telegramNotifier.isConfigured()) {
+                const file = new File([blob], filename, { type: 'application/json' });
+                const settings = storageManager.getSettings();
+                const escapeHtml = (text) => {
+                    if (text === null || text === undefined) return '';
+                    return String(text)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
+                };
+                const caption = `📦 <b>Library Backup - Manual Export</b>\n\n` +
+                               `📚 <b>${escapeHtml(settings.libraryName || 'My Library')}</b>\n` +
+                               `📅 <b>Date:</b> ${new Date().toLocaleDateString('en-IN')}\n` +
+                               `⏰ <b>Time:</b> ${new Date().toLocaleTimeString('en-IN')}\n\n` +
+                               `📊 <b>Statistics:</b>\n` +
+                               `👥 Members: ${data.members.length}\n` +
+                               `📚 Books: ${data.books.length}\n` +
+                               `💰 Fee Records: ${data.fees.length}\n` +
+                               `💸 Expenses: ${data.expenses.length}`;
+                
+                const result = await telegramNotifier.sendDocument(file, caption);
+                if (result.success) {
+                    alert('Data exported successfully and sent to Telegram!');
+                } else {
+                    alert('Data exported successfully! (Failed to send to Telegram)');
+                }
+            } else {
+                alert('Data exported successfully!');
+            }
+        });
+        
+        document.getElementById('importDataBtn').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    
+                    if (confirm('This will overwrite all existing data. Continue?')) {
+                        if (data.members) localStorage.setItem('libraryMembers', JSON.stringify(data.members));
+                        if (data.books) localStorage.setItem('libraryBooks', JSON.stringify(data.books));
+                        if (data.issuedBooks) localStorage.setItem('issuedBooks', JSON.stringify(data.issuedBooks));
+                        if (data.fees) localStorage.setItem('libraryFees', JSON.stringify(data.fees));
+                        if (data.expenses) localStorage.setItem('libraryExpenses', JSON.stringify(data.expenses));
+                        if (data.activities) localStorage.setItem('libraryActivities', JSON.stringify(data.activities));
+                        if (data.seats) localStorage.setItem('librarySeats', JSON.stringify(data.seats));
+                        if (data.settings) localStorage.setItem('librarySettings', JSON.stringify(data.settings));
+                        
+                        alert('Data imported successfully! Reloading page...');
+                        location.reload();
+                    }
+                } catch (error) {
+                    alert('Invalid backup file!');
+                }
+            };
+            reader.readAsText(file);
+        });
+        
+        document.getElementById('clearAllDataBtn').addEventListener('click', () => {
+            if (confirm('This will permanently delete ALL data. Are you absolutely sure?')) {
+                if (confirm('Last chance! This action cannot be undone. Continue?')) {
+                    localStorage.removeItem('libraryMembers');
+                    localStorage.removeItem('libraryBooks');
+                    localStorage.removeItem('issuedBooks');
+                    localStorage.removeItem('libraryFees');
+                    localStorage.removeItem('libraryExpenses');
+                    localStorage.removeItem('libraryActivities');
+                    localStorage.removeItem('librarySeats');
+                    localStorage.removeItem('librarySettings');
+                    
+                    alert('All data cleared! Redirecting to login...');
+                    window.location.href = 'index.html';
+                }
+            }
+        });
+        
+        function updateSystemInfo() {
+            document.getElementById('infoMembers').textContent = storageManager.getMembers().length;
+            document.getElementById('infoBooks').textContent = storageManager.getBooks().length;
+            document.getElementById('infoFees').textContent = storageManager.getFees().length;
+            document.getElementById('infoExpenses').textContent = storageManager.getExpenses().length;
+            document.getElementById('infoActivities').textContent = storageManager.getActivities().length;
+            
+            let totalSize = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    totalSize += localStorage[key].length + key.length;
+                }
+            }
+            document.getElementById('infoStorage').textContent = (totalSize / 1024).toFixed(2) + ' KB';
+        }
+        
+        updateSystemInfo();
+        
+        function updateSeatStats() {
+            const stats = storageManager.getSeatStats();
+            document.getElementById('currentTotalSeats').textContent = stats.total;
+            document.getElementById('currentAvailableSeats').textContent = stats.available;
+            document.getElementById('currentOccupiedSeats').textContent = stats.occupied;
+        }
+        
+        updateSeatStats();
+        
+        document.getElementById('addSeatsBtn').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('seatsToAdd').value);
+            if (!count || count < 1) {
+                alert('Please enter a valid number of seats to add');
+                return;
+            }
+            
+            if (confirm(`Add ${count} new seat(s) to the library?`)) {
+                const result = storageManager.addSeats(count);
+                if (result.success) {
+                    alert(`Successfully added ${count} seat(s)! New total: ${result.newTotal}`);
+                    updateSeatStats();
+                    updateSystemInfo();
+                    const settings = storageManager.getSettings();
+                    settings.totalSeats = result.newTotal;
+                    storageManager.saveSettings(settings);
+                    document.getElementById('totalSeats').value = result.newTotal;
+                    document.getElementById('seatsToAdd').value = '1';
+                } else {
+                    alert('Failed to add seats');
+                }
+            }
+        });
+        
+        document.getElementById('removeSeatsBtn').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('seatsToRemove').value);
+            if (!count || count < 1) {
+                alert('Please enter a valid number of seats to remove');
+                return;
+            }
+            
+            if (confirm(`Remove ${count} trailing seat(s) from the end of the library?\n\nNote: Only available seats from the end can be removed. Occupied seats will prevent removal.`)) {
+                const result = storageManager.removeSeats(count);
+                if (result.success) {
+                    alert(`Successfully removed ${result.removed} seat(s)! New total: ${result.newTotal}`);
+                    updateSeatStats();
+                    updateSystemInfo();
+                    const settings = storageManager.getSettings();
+                    settings.totalSeats = result.newTotal;
+                    storageManager.saveSettings(settings);
+                    document.getElementById('totalSeats').value = result.newTotal;
+                    document.getElementById('seatsToRemove').value = '1';
+                } else {
+                    alert(result.message || 'Failed to remove seats');
+                }
+            }
+        });
+        
+        document.getElementById('setExactSeatsBtn').addEventListener('click', () => {
+            const exactCount = parseInt(document.getElementById('exactSeatCount').value);
+            if (!exactCount || exactCount < 1) {
+                alert('Please enter a valid seat count');
+                return;
+            }
+            
+            const stats = storageManager.getSeatStats();
+            const currentTotal = stats.total;
+            
+            if (exactCount === currentTotal) {
+                alert('The seat count is already at this number');
+                return;
+            }
+            
+            const difference = exactCount - currentTotal;
+            let message = '';
+            
+            if (difference > 0) {
+                message = `This will add ${difference} new seat(s). Continue?`;
+            } else {
+                const seatsToRemove = Math.abs(difference);
+                if (seatsToRemove > stats.available) {
+                    alert(`Cannot set seat count to ${exactCount}. This requires removing ${seatsToRemove} seats, but only ${stats.available} are available.\n${stats.occupied} seats are occupied and cannot be removed.`);
+                    return;
+                }
+                message = `This will remove ${seatsToRemove} seat(s). Continue?`;
+            }
+            
+            if (confirm(message)) {
+                const result = storageManager.setExactSeatCount(exactCount);
+                if (result.success) {
+                    alert(`Seat count updated successfully! New total: ${result.newTotal}`);
+                    updateSeatStats();
+                    updateSystemInfo();
+                    const settings = storageManager.getSettings();
+                    settings.totalSeats = result.newTotal;
+                    storageManager.saveSettings(settings);
+                    document.getElementById('totalSeats').value = result.newTotal;
+                    document.getElementById('exactSeatCount').value = '';
+                } else {
+                    alert(result.message || 'Failed to update seat count');
+                }
+            }
+        });
+        
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        });
+    </script>
+</body>
+</html>
