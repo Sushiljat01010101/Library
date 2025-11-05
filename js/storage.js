@@ -8,8 +8,8 @@ class StorageManager {
     initializeDefaultUser() {
         if (!localStorage.getItem('libraryUser')) {
             const defaultUser = {
-                username: 'aaaa',
-                password: 'aaa',
+                username: 'admin',
+                password: 'admin123',
                 name: 'Administrator'
             };
             localStorage.setItem('libraryUser', JSON.stringify(defaultUser));
@@ -90,6 +90,8 @@ class StorageManager {
             activities: this.getActivities(),
             seats: this.getSeats(),
             settings: this.getSettings(),
+            user: this.getUser(),
+            preferences: this.getPreferences(),
             exportDate: new Date().toISOString(),
             backupType: isMissedBackup ? 'auto-missed' : 'auto'
         };
