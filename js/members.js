@@ -773,7 +773,7 @@ async function generateMemberPDF(member) {
                 const headerHeight = 15;
                 const footerHeight = 18;
                 const availableHeight = pageHeight - headerHeight - footerHeight;
-                const imgWidth = availableHeight * (9 / 16);
+                const imgWidth = availableHeight * (9 / 14);
                 const imgHeight = availableHeight;
                 const imgX = (pageWidth - imgWidth) / 2;
                 const imgY = headerHeight;
