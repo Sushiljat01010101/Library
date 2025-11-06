@@ -325,8 +325,39 @@ class StorageManager {
             }
         }
         
+        const photoData = member.photo;
         const idProofData = member.idProof;
+        delete member.photo;
         delete member.idProof;
+        
+        if (photoData && photoData.startsWith('data:image')) {
+            if (typeof telegramNotifier !== 'undefined' && telegramNotifier.isConfigured()) {
+                const caption = `📸 <b>Member Photo</b>\n\n` +
+                              `👤 <b>Name:</b> ${telegramNotifier.escapeHtml(member.name)}\n` +
+                              `📱 <b>Contact:</b> ${telegramNotifier.escapeHtml(member.contact)}\n` +
+                              `📅 <b>Captured:</b> ${new Date().toLocaleDateString('en-IN')}`;
+                
+                try {
+                    const result = await telegramNotifier.sendPhoto(photoData, caption);
+                    if (result.success && result.fileId) {
+                        member.photoTelegramFileId = result.fileId;
+                        member.photoTelegramMessageId = result.messageId;
+                        const { chatId } = telegramNotifier.getSettings();
+                        if (chatId && result.messageId) {
+                            const cleanChatId = chatId.toString().replace('-100', '');
+                            member.photoTelegramLink = `https://t.me/c/${cleanChatId}/${result.messageId}`;
+                        }
+                        console.log('Member photo sent to Telegram, link and file ID saved');
+                    } else {
+                        console.error('Failed to send member photo to Telegram, photo will not be saved');
+                    }
+                } catch (err) {
+                    console.error('Failed to send member photo to Telegram:', err);
+                }
+            } else {
+                console.log('Telegram not configured, member photo will not be saved');
+            }
+        }
         
         if (idProofData) {
             if (typeof telegramNotifier !== 'undefined' && telegramNotifier.isConfigured()) {
@@ -403,10 +434,6 @@ class StorageManager {
             }
         }
         
-        if (typeof telegramNotifier !== 'undefined') {
-            telegramNotifier.notifyMemberAdded(member);
-        }
-        
         return member;
     }
     
@@ -441,8 +468,53 @@ class StorageManager {
                 }
             }
             
+            const photoData = updatedMember.photo;
             const idProofData = updatedMember.idProof;
+            delete updatedMember.photo;
             delete updatedMember.idProof;
+            
+            if (!photoData || photoData === '') {
+                updatedMember.photoTelegramFileId = oldMember.photoTelegramFileId;
+                updatedMember.photoTelegramMessageId = oldMember.photoTelegramMessageId;
+                updatedMember.photoTelegramLink = oldMember.photoTelegramLink;
+            }
+            
+            if (!idProofData) {
+                updatedMember.idProofTelegramFileId = oldMember.idProofTelegramFileId;
+                updatedMember.idProofTelegramMessageId = oldMember.idProofTelegramMessageId;
+                updatedMember.idProofTelegramLink = oldMember.idProofTelegramLink;
+            }
+            
+            if (photoData && photoData.startsWith('data:image')) {
+                if (typeof telegramNotifier !== 'undefined' && telegramNotifier.isConfigured()) {
+                    const memberName = updatedMember.name || members[index].name;
+                    const memberContact = updatedMember.contact || members[index].contact;
+                    const caption = `📸 <b>Member Photo Updated</b>\n\n` +
+                                  `👤 <b>Name:</b> ${telegramNotifier.escapeHtml(memberName)}\n` +
+                                  `📱 <b>Contact:</b> ${telegramNotifier.escapeHtml(memberContact)}\n` +
+                                  `📅 <b>Updated:</b> ${new Date().toLocaleDateString('en-IN')}`;
+                    
+                    try {
+                        const result = await telegramNotifier.sendPhoto(photoData, caption);
+                        if (result.success && result.fileId) {
+                            updatedMember.photoTelegramFileId = result.fileId;
+                            updatedMember.photoTelegramMessageId = result.messageId;
+                            const { chatId } = telegramNotifier.getSettings();
+                            if (chatId && result.messageId) {
+                                const cleanChatId = chatId.toString().replace('-100', '');
+                                updatedMember.photoTelegramLink = `https://t.me/c/${cleanChatId}/${result.messageId}`;
+                            }
+                            console.log('Updated member photo sent to Telegram, link and file ID saved');
+                        } else {
+                            console.error('Failed to send updated member photo to Telegram');
+                        }
+                    } catch (err) {
+                        console.error('Failed to send updated member photo to Telegram:', err);
+                    }
+                } else {
+                    console.log('Telegram not configured, member photo will not be saved');
+                }
+            }
             
             if (idProofData) {
                 if (typeof telegramNotifier !== 'undefined' && telegramNotifier.isConfigured()) {
@@ -489,10 +561,6 @@ class StorageManager {
                     members[index].seat = 0;
                     this.saveMembers(members);
                 }
-            }
-            
-            if (typeof telegramNotifier !== 'undefined') {
-                telegramNotifier.notifyMemberUpdated(oldMember, members[index]);
             }
             
             return true;
