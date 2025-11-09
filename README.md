@@ -3,7 +3,6 @@
 A comprehensive, responsive Library Management System built with pure HTML, CSS, and Vanilla JavaScript. This system provides complete library administration capabilities including member management, book tracking, fee management, expense tracking, and detailed analytics - all in a single-page application with LocalStorage for data persistence.
 
 ## ✨ Features
-https://replit.com/@m4bkoix/GoldenLibraryPro-141-1
 
 ### 🔐 Authentication & Security
 - Admin login with session management
