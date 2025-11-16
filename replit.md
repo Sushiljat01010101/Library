@@ -33,6 +33,7 @@ The system encompasses several core features:
 -   **Activity Log**: Tracks key actions with timestamps and filtering.
 -   **Settings & Backup**: Configurable library settings, password management, dynamic seat management, complete data export/import (JSON), data clearing, and an auto backup system with customizable schedules (Daily, Weekly, Monthly, Custom) and optional Telegram integration for backup file delivery.
 -   **Telegram Notifications**: Real-time notifications for member and payment events, with secure handling of photos and ID proofs by sending to Telegram and storing only references locally. Includes a test notification feature.
+-   **RFID Control Panel**: Standalone admin panel (Rfid.html) for managing RFID access cards and monitoring library access. Features dashboard with card statistics, card management (add/edit/delete/suspend), access logs, import/export functionality, and remote control capabilities (emergency unlock, menu access). Integrates with Firebase for real-time data synchronization. Accessible via navigation menu with 📡 icon.
 -   **Help & Support Center**: Modern page with developer information, feature guides, quick tips, and a multilingual (English/Hindi) AI-powered chatbot assistant with a comprehensive knowledge base.
 
 ### System Design Choices

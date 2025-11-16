@@ -1,0 +1,2361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 RFID Admin Panel - Library Management System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-gold: #f4c430;
+            --dark-gold: #d4a017;
+            --light-gold: #ffd700;
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --bg-card: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --border-color: #404040;
+            --success: #4caf50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --info: #2196f3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Particles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary-gold);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+            25% { transform: translate(100px, -100px) scale(1.2); opacity: 0.5; }
+            50% { transform: translate(-50px, -200px) scale(0.8); opacity: 0.2; }
+            75% { transform: translate(150px, -150px) scale(1.1); opacity: 0.4; }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with Glassmorphism */
+        .header {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.5rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header h1 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .firebase-status {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50px;
+            font-size: 0.95rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .firebase-status:hover {
+            background: rgba(255,255,255,0.08);
+            transform: scale(1.02);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--danger);
+            animation: pulse-status 2s infinite;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .status-indicator.connected {
+            background: var(--success);
+        }
+
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.15); }
+        }
+
+        /* Navigation Tabs - Responsive */
+        .nav-tabs {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .nav-tab {
+            padding: 0.875rem 1.75rem;
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(244,196,48,0.2);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, rgba(244,196,48,0.3), rgba(244,196,48,0.15));
+            color: var(--primary-gold);
+            box-shadow: 0 4px 15px rgba(244,196,48,0.3);
+            border-color: rgba(244,196,48,0.5);
+        }
+
+        /* Tab Content with Animation */
+        .tab-content {
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stats Grid - Responsive */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 18px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--light-gold));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.6);
+            border-color: rgba(244,196,48,0.3);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card h3 {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        /* Action Bar - Fully Responsive */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .search-filter-group {
+            display: flex;
+            flex: 1;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            min-width: min(300px, 100%);
+        }
+
+        .search-box, .filter-select {
+            flex: 1;
+            min-width: 180px;
+            padding: 0.875rem 1.25rem;
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus, .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(244,196,48,0.1);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .filter-select {
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            color: #1a1a1a;
+            box-shadow: 0 4px 15px rgba(244,196,48,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(244,196,48,0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(46,204,113,0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46,204,113,0.4);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(231,76,60,0.3);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(243,156,18,0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Cards Table - Mobile Responsive */
+        .cards-table {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        thead {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+        }
+
+        th {
+            padding: 1.25rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-gold);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1.25rem 1rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(255,255,255,0.08);
+            transform: scale(1.001);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: rgba(46,204,113,0.25);
+            color: var(--success);
+            border: 1px solid rgba(46,204,113,0.4);
+        }
+
+        .status-expired {
+            background: rgba(231,76,60,0.25);
+            color: var(--danger);
+            border: 1px solid rgba(231,76,60,0.4);
+        }
+
+        .status-never {
+            background: rgba(153,153,153,0.25);
+            color: var(--text-secondary);
+            border: 1px solid rgba(153,153,153,0.4);
+        }
+
+        /* Modal - Responsive */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(13,17,23,0.98);
+            backdrop-filter: blur(30px);
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 550px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+            animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-gold), var(--light-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: var(--text-primary);
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(244,196,48,0.1);
+            background: var(--bg-primary);
+        }
+
+        /* Remote Control Section - Responsive Grid */
+        .remote-control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .emergency-unlock-section {
+            margin-bottom: 0;
+        }
+
+        .emergency-unlock-btn {
+            width: 100%;
+            padding: 1.75rem;
+            background: linear-gradient(145deg, rgba(231,76,60,0.35), rgba(231,76,60,0.25));
+            border: 2px solid rgba(231,76,60,0.6);
+            border-radius: 18px;
+            color: #fff;
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 6px 25px rgba(231,76,60,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .emergency-unlock-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(231,76,60,0.6);
+            background: linear-gradient(145deg, rgba(231,76,60,0.45), rgba(231,76,60,0.35));
+        }
+
+        .emergency-unlock-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .emergency-unlock-btn .icon {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            animation: pulse-icon 2.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .unlock-status {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.875rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Log Entry - Mobile Friendly */
+        .log-entry {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            padding: 1.25rem;
+            border-radius: 14px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            flex-wrap: wrap;
+        }
+
+        .log-entry:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .log-entry .log-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .log-entry .log-time {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .log-entry .log-status {
+            padding: 0.375rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .log-granted {
+            background: rgba(46,204,113,0.25);
+            color: var(--success);
+            border: 1px solid rgba(46,204,113,0.4);
+        }
+
+        .log-denied {
+            background: rgba(231,76,60,0.25);
+            color: var(--danger);
+            border: 1px solid rgba(231,76,60,0.4);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(13,17,23,0.98);
+            backdrop-filter: blur(30px);
+            padding: 1.25rem 1.75rem;
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: none;
+            z-index: 2000;
+            min-width: 320px;
+            max-width: 90vw;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.info { border-left: 4px solid var(--info); }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--primary-gold);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 3rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Filter Pills */
+        .filter-pills {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            padding: 0.5rem 1rem;
+            background: rgba(244,196,48,0.15);
+            border: 1px solid rgba(244,196,48,0.3);
+            border-radius: 50px;
+            color: var(--primary-gold);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-pill:hover {
+            background: rgba(244,196,48,0.25);
+            transform: translateY(-2px);
+        }
+
+        .filter-pill .remove {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* Responsive Design - Mobile */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1.25rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-filter-group {
+                width: 100%;
+            }
+
+            .button-group {
+                width: 100%;
+            }
+
+            .button-group .btn {
+                flex: 1;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.875rem 0.5rem;
+            }
+
+            .modal-content {
+                padding: 1.5rem;
+                margin: 0.5rem;
+            }
+
+            .toast {
+                right: 1rem;
+                left: 1rem;
+                min-width: auto;
+            }
+
+            .nav-tabs {
+                gap: 0.5rem;
+            }
+
+            .nav-tab {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.85rem;
+            }
+
+            .remote-control-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .emergency-unlock-btn {
+                padding: 1.25rem;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Tablet Responsive */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .remote-control-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Large Desktop */
+        @media (min-width: 1440px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Dark Mode Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(244,196,48,0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(244,196,48,0.5);
+        }
+
+        /* Date Range Picker */
+        .date-range-group {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        /* Import/Export Cards */
+        .import-export-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+            gap: 2rem;
+        }
+
+        .ie-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 18px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .ie-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+        }
+
+        .ie-card h3 {
+            font-size: 1.4rem;
+            color: var(--primary-gold);
+            margin-bottom: 1rem;
+        }
+
+        .ie-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .file-upload {
+            display: none;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 14px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-gold);
+            background: rgba(244,196,48,0.08);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-gold);
+            background: rgba(244,196,48,0.15);
+            transform: scale(1.02);
+        }
+
+        /* Setup Card */
+        .setup-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 18px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .setup-card h3 {
+            color: var(--primary-gold);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .setup-card code {
+            background: rgba(0,0,0,0.4);
+            padding: 0.35rem 0.7rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            color: var(--primary-gold);
+            font-size: 0.9rem;
+        }
+
+        .setup-card ol {
+            padding-left: 1.75rem;
+            line-height: 2;
+        }
+
+        .setup-card li {
+            margin-bottom: 0.75rem;
+        }
+
+        /* Register Status Banner */
+        .register-status {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            border-radius: 14px;
+            background: rgba(46,204,113,0.2);
+            color: var(--success);
+            font-weight: 600;
+            border: 1px solid rgba(46,204,113,0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Active Filter Indicator */
+        .filter-active-indicator {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-gold);
+            border-radius: 50%;
+            animation: pulse-status 2s infinite;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-group label:hover {
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div class="bg-particles">
+        <div class="particle" style="left: 10%; top: 20%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; top: 80%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 50%; top: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 80%; top: 30%; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 90%; top: 70%; animation-delay: 8s;"></div>
+        <div class="particle" style="left: 30%; top: 10%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 70%; top: 90%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 40%; top: 40%; animation-delay: 7s;"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔮 RFID Admin Panel</h1>
+            <div class="firebase-status">
+                <div class="status-indicator" id="firebaseStatus"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')" data-testid="tab-dashboard">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('cards')" data-testid="tab-cards">💳 Manage Cards</button>
+            <button class="nav-tab" onclick="switchTab('logs')" data-testid="tab-logs">📋 Access Logs</button>
+            <button class="nav-tab" onclick="switchTab('import-export')" data-testid="tab-import">💾 Import/Export</button>
+            <button class="nav-tab" onclick="switchTab('setup')" data-testid="tab-setup">⚙️ Setup</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Cards</h3>
+                    <div class="value" id="totalCards">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Cards</h3>
+                    <div class="value" id="activeCards" style="background: linear-gradient(135deg, #2ecc71, #27ae60); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Expired Cards</h3>
+                    <div class="value" id="expiredCards" style="background: linear-gradient(135deg, #e74c3c, #c0392b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Recent Access</h3>
+                    <div class="value" id="recentAccess" style="background: linear-gradient(135deg, #f39c12, #e67e22); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+                </div>
+            </div>
+
+            <!-- ESP32 Connection Status -->
+            <div class="cards-table" style="margin-bottom: 2rem;">
+                <div style="padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">📡 ESP32 Device Status</h3>
+                    <div id="esp32StatusContainer">
+                        <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            <p>No ESP32 devices connected</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Remote Control Section -->
+            <div class="remote-control-grid">
+                <!-- Emergency Unlock -->
+                <div class="emergency-unlock-section">
+                    <button class="emergency-unlock-btn" onclick="triggerEmergencyUnlock()" data-testid="button-emergency-unlock">
+                        <span class="icon">🚨</span>
+                        <span>EMERGENCY UNLOCK</span>
+                    </button>
+                    <div class="unlock-status" id="unlockStatus">
+                        Click button to remotely unlock door (3 seconds)
+                    </div>
+                </div>
+                
+                <!-- Open Menu -->
+                <div class="emergency-unlock-section">
+                    <button class="emergency-unlock-btn" style="background: linear-gradient(145deg, rgba(52,152,219,0.35), rgba(41,128,185,0.25)); border-color: rgba(52,152,219,0.6);" onclick="triggerMenuMode()" data-testid="button-open-menu">
+                        <span class="icon">📋</span>
+                        <span>OPEN MENU</span>
+                    </button>
+                    <div class="unlock-status" id="menuStatus">
+                        Open device menu remotely for settings
+                    </div>
+                </div>
+                
+                <!-- Close Menu -->
+                <div class="emergency-unlock-section">
+                    <button class="emergency-unlock-btn" style="background: linear-gradient(145deg, rgba(155,89,182,0.35), rgba(142,68,173,0.25)); border-color: rgba(155,89,182,0.6);" onclick="triggerCloseMenu()" data-testid="button-close-menu">
+                        <span class="icon">🚪</span>
+                        <span>CLOSE MENU</span>
+                    </button>
+                    <div class="unlock-status" id="closeMenuStatus">
+                        Return device to scan mode remotely
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards Management Tab -->
+        <div class="tab-content" id="cards">
+            <!-- Recent Cards Section -->
+            <div class="cards-table" style="margin-bottom: 2rem;">
+                <div style="padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; color: var(--primary);">🆕 Recently Registered Cards (Last 10)</h3>
+                    <div id="recentCardsContainer">
+                        <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            <p>No recent cards</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <div class="search-filter-group">
+                    <input type="text" class="search-box" id="searchCards" placeholder="🔍 Search cards..." oninput="filterCards()" data-testid="input-search-cards">
+                    <select class="filter-select" id="statusFilter" onchange="filterCards()" data-testid="select-status-filter">
+                        <option value="all">All Status</option>
+                        <option value="active">Active Only</option>
+                        <option value="expired">Expired Only</option>
+                        <option value="never">Never Expires</option>
+                    </select>
+                    <select class="filter-select" id="timeRestrictionFilter" onchange="filterCards()" data-testid="select-time-filter">
+                        <option value="all">All Access Times</option>
+                        <option value="24/7">24/7 Access</option>
+                        <option value="restricted">Time Restricted</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-success" id="activateRegisterBtn" data-testid="button-activate-register" onclick="activateRegisterMode()">📝 Register Mode</button>
+                    <button class="btn btn-primary" onclick="openAddCardModal()" data-testid="button-add-card">➕ Add Card</button>
+                </div>
+            </div>
+            
+            <div class="register-status" id="registerStatus" style="display: none;">
+                ✅ Registration Mode Active - Scan card on ESP32 (30s timeout)
+            </div>
+            
+            <div class="cards-table">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Card Name</th>
+                                <th>UID</th>
+                                <th>Expiry Date</th>
+                                <th>Time Restriction</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cardsTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    <div class="spinner"></div>
+                                    <p>Loading cards...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Lazy loading sentinel -->
+                <div id="loadMoreSentinel" style="height: 1px; margin: 1rem 0;"></div>
+                <div id="loadingIndicator" style="display: none; text-align: center; padding: 1rem;">
+                    <div class="spinner" style="margin: 1rem auto;"></div>
+                    <p style="color: var(--text-secondary);">Loading more cards...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Access Logs Tab -->
+        <div class="tab-content" id="logs">
+            <div class="action-bar">
+                <div class="search-filter-group">
+                    <select class="filter-select" id="logStatusFilter" onchange="filterLogs()" data-testid="select-log-status">
+                        <option value="all">All Status</option>
+                        <option value="granted">Granted Only</option>
+                        <option value="denied">Denied Only</option>
+                    </select>
+                    <input type="date" class="search-box date-input" id="logDateFrom" onchange="filterLogs()" data-testid="input-date-from">
+                    <input type="date" class="search-box date-input" id="logDateTo" onchange="filterLogs()" data-testid="input-date-to">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="clearLogFilters()" data-testid="button-clear-filters">🔄 Clear Filters</button>
+                    <button class="btn btn-secondary" onclick="clearLogs()" data-testid="button-clear-logs">🗑️ Clear Logs</button>
+                </div>
+            </div>
+            
+            <div id="logsContainer">
+                <div class="empty-state">
+                    <p>No access logs yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import/Export Tab -->
+        <div class="tab-content" id="import-export">
+            <div class="import-export-grid">
+                <div class="ie-card">
+                    <h3>📥 Import Data</h3>
+                    <p>Import cards from a JSON file backup. This will add cards to your database.</p>
+                    <div class="upload-area" id="uploadArea">
+                        <p>📁 Drag & drop JSON file here</p>
+                        <p style="font-size: 0.85rem; color: #999; margin-top: 0.5rem;">or click to browse</p>
+                    </div>
+                    <input type="file" id="fileUpload" class="file-upload" accept=".json" onchange="handleFileUpload(event)">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileUpload').click()" data-testid="button-browse-file">Browse File</button>
+                </div>
+                
+                <div class="ie-card">
+                    <h3>📤 Export Data</h3>
+                    <p>Export all your cards to a JSON file for backup or migration.</p>
+                    <button class="btn btn-primary" onclick="exportData()" data-testid="button-export-data">📥 Download JSON Backup</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Tab -->
+        <div class="tab-content" id="setup">
+            <div class="setup-card">
+                <h3>🔧 Firebase Configuration</h3>
+                <ol>
+                    <li>Go to <a href="https://console.firebase.google.com" target="_blank" style="color: var(--primary);">Firebase Console</a></li>
+                    <li>Create a new project or select existing</li>
+                    <li>Enable <strong>Realtime Database</strong></li>
+                    <li>Get your configuration from Project Settings</li>
+                    <li>Enter credentials below:</li>
+                </ol>
+            </div>
+
+            <div class="setup-card">
+                <h3>🔑 Firebase Credentials</h3>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="text" id="apiKey" placeholder="AIzaSyC..." data-testid="input-api-key">
+                </div>
+                <div class="form-group">
+                    <label>Database URL</label>
+                    <input type="text" id="databaseURL" placeholder="https://your-project.firebaseio.com" data-testid="input-database-url">
+                </div>
+                <div class="form-group">
+                    <label>Project ID</label>
+                    <input type="text" id="projectId" placeholder="your-project-id" data-testid="input-project-id">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="saveFirebaseConfig()" data-testid="button-save-config">💾 Save Configuration</button>
+                    <button class="btn btn-secondary" onclick="testFirebaseConnection()" data-testid="button-test-connection">🔌 Test Connection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Modal -->
+    <div class="modal" id="cardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Card</h2>
+                <button class="close-btn" onclick="closeModal()" data-testid="button-close-modal">×</button>
+            </div>
+            <form onsubmit="saveCard(event)">
+                <input type="hidden" id="editCardKey">
+                
+                <div class="form-group">
+                    <label>Card UID</label>
+                    <input type="text" id="cardUID" required placeholder="AA:BB:CC:DD" data-testid="input-card-uid">
+                </div>
+                
+                <div class="form-group">
+                    <label>Card Name</label>
+                    <input type="text" id="cardName" required placeholder="John Doe" data-testid="input-card-name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Expiry Type</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="expiryType" value="never" checked onchange="toggleExpiryDate()">
+                            Never Expires
+                        </label>
+                        <label>
+                            <input type="radio" name="expiryType" value="date" onchange="toggleExpiryDate()">
+                            Set Date
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="expiryDateGroup" style="display: none;">
+                    <label>Expiry Date</label>
+                    <input type="date" id="expiryDate" data-testid="input-expiry-date">
+                </div>
+                
+                <div class="form-group">
+                    <label>Time Restriction</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="timeRestriction" value="none" checked onchange="toggleTimeRestriction()">
+                            24/7 Access
+                        </label>
+                        <label>
+                            <input type="radio" name="timeRestriction" value="custom" onchange="toggleTimeRestriction()">
+                            Custom Times
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="timeRestrictionGroup" style="display: none;">
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time" id="startTime" value="09:00">
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" id="endTime" value="18:00">
+                    </div>
+                    <div class="form-group">
+                        <label>Allowed Days</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="daySun" checked> Sun</label>
+                            <label><input type="checkbox" id="dayMon" checked> Mon</label>
+                            <label><input type="checkbox" id="dayTue" checked> Tue</label>
+                            <label><input type="checkbox" id="dayWed" checked> Wed</label>
+                            <label><input type="checkbox" id="dayThu" checked> Thu</label>
+                            <label><input type="checkbox" id="dayFri" checked> Fri</label>
+                            <label><input type="checkbox" id="daySat" checked> Sat</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" data-testid="button-save-card">💾 Save Card</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        let db = null;
+        let firebaseConfig = null;
+        let cardsData = {};
+        let logsData = [];
+        let filteredLogsData = [];
+        
+        // Lazy loading state
+        let cardsArray = [];
+        let filteredCardsArray = [];
+        let displayedCardsCount = 0;
+        const CARDS_PER_CHUNK = 50;
+        let loadMoreObserver = null;
+        
+        // Recent cards tracking
+        let recentCardsData = {};
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // Initialize Firebase
+        function initializeFirebase() {
+            const stored = localStorage.getItem('firebaseConfig');
+            
+            if (stored) {
+                firebaseConfig = JSON.parse(stored);
+                
+                document.getElementById('apiKey').value = firebaseConfig.apiKey || '';
+                document.getElementById('databaseURL').value = firebaseConfig.databaseURL || '';
+                document.getElementById('projectId').value = firebaseConfig.projectId || '';
+                
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp({
+                            apiKey: firebaseConfig.apiKey,
+                            databaseURL: firebaseConfig.databaseURL,
+                            projectId: firebaseConfig.projectId
+                        });
+                    }
+                    
+                    db = firebase.database();
+                    updateStatus(true);
+                    loadAllData();
+                    setupRealtimeListeners();
+                } catch (error) {
+                    console.error('Firebase initialization error:', error);
+                    updateStatus(false);
+                    showToast('Firebase connection failed: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function updateStatus(connected) {
+            const indicator = document.getElementById('firebaseStatus');
+            const text = document.getElementById('statusText');
+            if (connected) {
+                indicator.classList.add('connected');
+                text.textContent = 'Connected';
+            } else {
+                indicator.classList.remove('connected');
+                text.textContent = 'Disconnected';
+            }
+        }
+
+        function saveFirebaseConfig() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const databaseURL = document.getElementById('databaseURL').value.trim();
+            const projectId = document.getElementById('projectId').value.trim();
+
+            if (!apiKey || !databaseURL || !projectId) {
+                showToast('Please fill all Firebase configuration fields', 'error');
+                return;
+            }
+
+            firebaseConfig = { apiKey, databaseURL, projectId };
+            localStorage.setItem('firebaseConfig', JSON.stringify(firebaseConfig));
+            showToast('Configuration saved! Initializing Firebase...', 'success');
+            
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        function testFirebaseConnection() {
+            if (!db) {
+                showToast('Please save configuration first', 'error');
+                return;
+            }
+            
+            db.ref('.info/connected').once('value').then((snapshot) => {
+                if (snapshot.val() === true) {
+                    showToast('Firebase connection successful!', 'success');
+                } else {
+                    showToast('Firebase connection failed', 'error');
+                }
+            }).catch((error) => {
+                showToast('Connection test failed: ' + error.message, 'error');
+            });
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Load all data
+        function loadAllData() {
+            if (!db) return;
+            
+            // Load cards with incremental listeners
+            db.ref('rfid/cards').once('value').then((snapshot) => {
+                cardsData = snapshot.val() || {};
+                cardsArray = Object.entries(cardsData).map(([key, card]) => ({ key, ...card }));
+                displayedCardsCount = 0;
+                renderCards();
+                updateStats();
+                setupLazyLoading();
+            });
+
+            // Load recent cards (last 10)
+            db.ref('rfid/cards').orderByChild('createdAt').limitToLast(10).once('value').then((snapshot) => {
+                recentCardsData = {};
+                snapshot.forEach((child) => {
+                    recentCardsData[child.key] = child.val();
+                });
+                renderRecentCards();
+            });
+
+            db.ref('rfid/logs').limitToLast(100).once('value').then((snapshot) => {
+                logsData = [];
+                snapshot.forEach((child) => {
+                    logsData.push({ key: child.key, ...child.val() });
+                });
+                logsData.reverse();
+                filteredLogsData = [...logsData];
+                renderLogs();
+            });
+        }
+
+        // Setup realtime listeners
+        function setupRealtimeListeners() {
+            if (!db) return;
+
+            // Use incremental listeners for better performance
+            db.ref('rfid/cards').on('child_added', (snapshot) => {
+                const key = snapshot.key;
+                const card = snapshot.val();
+                if (!cardsData[key]) {
+                    cardsData[key] = card;
+                    cardsArray.push({ key, ...card });
+                    applyFiltersAndRender();
+                    updateStats();
+                }
+            });
+
+            db.ref('rfid/cards').on('child_changed', (snapshot) => {
+                const key = snapshot.key;
+                const card = snapshot.val();
+                cardsData[key] = card;
+                const index = cardsArray.findIndex(c => c.key === key);
+                if (index !== -1) {
+                    cardsArray[index] = { key, ...card };
+                }
+                applyFiltersAndRender();
+                updateStats();
+            });
+
+            db.ref('rfid/cards').on('child_removed', (snapshot) => {
+                const key = snapshot.key;
+                delete cardsData[key];
+                cardsArray = cardsArray.filter(c => c.key !== key);
+                applyFiltersAndRender();
+                updateStats();
+            });
+
+            // Listen for recent cards updates
+            db.ref('rfid/cards').orderByChild('createdAt').limitToLast(10).on('value', (snapshot) => {
+                recentCardsData = {};
+                snapshot.forEach((child) => {
+                    recentCardsData[child.key] = child.val();
+                });
+                renderRecentCards();
+            });
+
+            // Listen for ESP32 device status
+            db.ref('rfid/devices').on('value', (snapshot) => {
+                renderESP32Status(snapshot.val() || {});
+            });
+
+            db.ref('rfid/logs').limitToLast(1).on('child_added', (snapshot) => {
+                const newLog = { key: snapshot.key, ...snapshot.val() };
+                logsData.unshift(newLog);
+                if (logsData.length > 100) logsData.pop();
+                filterLogs();
+                updateStats();
+            });
+        }
+
+        // Setup lazy loading with IntersectionObserver
+        function setupLazyLoading() {
+            const sentinel = document.getElementById('loadMoreSentinel');
+            if (!sentinel) return;
+
+            // Disconnect existing observer if any
+            if (loadMoreObserver) {
+                loadMoreObserver.disconnect();
+            }
+
+            loadMoreObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && displayedCardsCount < filteredCardsArray.length) {
+                        loadMoreCards();
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '200px',
+                threshold: 0.1
+            });
+
+            loadMoreObserver.observe(sentinel);
+        }
+
+        // Load more cards (lazy loading)
+        function loadMoreCards() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'block';
+            }
+
+            // Simulate a small delay for smooth UX
+            requestAnimationFrame(() => {
+                const startIndex = displayedCardsCount;
+                const endIndex = Math.min(startIndex + CARDS_PER_CHUNK, filteredCardsArray.length);
+                
+                appendCardsToTable(filteredCardsArray.slice(startIndex, endIndex));
+                displayedCardsCount = endIndex;
+
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
+            });
+        }
+
+        // Render a single card row
+        function createCardRow(cardData, now) {
+            const card = cardData;
+            const key = cardData.key;
+            
+            const isExpired = card.expiry > 0 && now >= card.expiry;
+            const statusClass = isExpired ? 'status-expired' : (card.expiry === 0 ? 'status-never' : 'status-active');
+            const statusText = isExpired ? 'EXPIRED' : (card.expiry === 0 ? 'Never Expires' : 'Active');
+            const expiryDisplay = card.expiry === 0 ? 'Never' : new Date(card.expiry * 1000).toLocaleDateString();
+
+            let timeDisplay = '<span style="color: #999;">24/7</span>';
+            if (card.timeRestriction && card.timeRestriction.enabled) {
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const allowedDays = card.timeRestriction.allowedDays || [];
+                const daysText = allowedDays.map(d => dayNames[d]).join(', ');
+                timeDisplay = `<span style="color: #f39c12; font-size: 0.85rem;">⏰ ${card.timeRestriction.startTime} - ${card.timeRestriction.endTime}<br><small style="color: #999;">${daysText}</small></span>`;
+            }
+
+            const row = document.createElement('tr');
+            row.setAttribute('data-card-key', key);
+            row.innerHTML = `
+                <td><strong>${card.name}</strong></td>
+                <td><code style="font-size: 0.85rem;">${card.uid}</code></td>
+                <td>${expiryDisplay}</td>
+                <td>${timeDisplay}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td style="white-space: nowrap;">
+                    <button class="btn btn-warning" style="padding: 0.5rem 1rem; margin: 0.25rem;" onclick="editCard('${key}')" data-testid="button-edit-${key}">✏️</button>
+                    <button class="btn btn-success" style="padding: 0.5rem 1rem; margin: 0.25rem;" onclick="renewCard('${key}')" data-testid="button-renew-${key}">🔄</button>
+                    <button class="btn btn-danger" style="padding: 0.5rem 1rem; margin: 0.25rem;" onclick="deleteCard('${key}')" data-testid="button-delete-${key}">🗑️</button>
+                </td>
+            `;
+            return row;
+        }
+
+        // Append cards to table (for lazy loading)
+        function appendCardsToTable(cards) {
+            const tbody = document.getElementById('cardsTableBody');
+            const now = Math.floor(Date.now() / 1000);
+            const fragment = document.createDocumentFragment();
+
+            cards.forEach(cardData => {
+                const row = createCardRow(cardData, now);
+                fragment.appendChild(row);
+            });
+            
+            tbody.appendChild(fragment);
+        }
+
+        // Apply filters to cards array
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchCards').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const timeFilter = document.getElementById('timeRestrictionFilter').value;
+            
+            // Filter cards
+            filteredCardsArray = cardsArray.filter(cardData => {
+                const card = cardData;
+                const matchesSearch = card.name.toLowerCase().includes(searchTerm) || 
+                                    card.uid.toLowerCase().includes(searchTerm);
+                
+                const now = Math.floor(Date.now() / 1000);
+                const isExpired = card.expiry > 0 && now >= card.expiry;
+                const isActive = !isExpired && card.expiry > 0;
+                const isNever = card.expiry === 0;
+                
+                let matchesStatus = true;
+                if (statusFilter === 'active') matchesStatus = isActive;
+                if (statusFilter === 'expired') matchesStatus = isExpired;
+                if (statusFilter === 'never') matchesStatus = isNever;
+                
+                let matchesTime = true;
+                if (timeFilter === '24/7') matchesTime = !card.timeRestriction || !card.timeRestriction.enabled;
+                if (timeFilter === 'restricted') matchesTime = card.timeRestriction && card.timeRestriction.enabled;
+                
+                return matchesSearch && matchesStatus && matchesTime;
+            });
+        }
+
+        // Apply filters and render cards
+        function applyFiltersAndRender() {
+            applyFilters();
+            renderCards();
+        }
+
+        // Render cards table with lazy loading
+        function renderCards() {
+            const tbody = document.getElementById('cardsTableBody');
+            const sentinel = document.getElementById('loadMoreSentinel');
+            
+            // Clear existing rows
+            tbody.innerHTML = '';
+            displayedCardsCount = 0;
+
+            if (filteredCardsArray.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><p>No cards found</p></td></tr>`;
+                if (sentinel) sentinel.style.display = 'none';
+                return;
+            }
+
+            if (sentinel) sentinel.style.display = 'block';
+            
+            // Re-setup lazy loading observer
+            setupLazyLoading();
+            
+            // Load first chunk
+            loadMoreCards();
+        }
+
+        function filterCards() {
+            applyFiltersAndRender();
+        }
+
+        // Render recent cards section
+        function renderRecentCards() {
+            const container = document.getElementById('recentCardsContainer');
+            if (!container) return;
+
+            const recentArray = Object.entries(recentCardsData)
+                .map(([key, card]) => ({ key, ...card }))
+                .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+                .slice(0, 10);
+
+            if (recentArray.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><p>No recent cards</p></div>';
+                return;
+            }
+
+            const now = Math.floor(Date.now() / 1000);
+            container.innerHTML = recentArray.map(cardData => {
+                const card = cardData;
+                const key = cardData.key;
+                const isExpired = card.expiry > 0 && now >= card.expiry;
+                const statusClass = isExpired ? 'status-expired' : (card.expiry === 0 ? 'status-never' : 'status-active');
+                const statusText = isExpired ? 'EXPIRED' : (card.expiry === 0 ? 'Never Expires' : 'Active');
+                const createdDate = card.createdAt ? new Date(card.createdAt).toLocaleString() : 'Unknown';
+
+                return `
+                    <div class="log-entry">
+                        <div class="log-info" style="flex: 1;">
+                            <strong>${card.name}</strong> - <code style="font-size: 0.85rem;">${card.uid}</code>
+                            <div class="log-time">Registered: ${createdDate}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            <button class="btn btn-warning" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="editCard('${key}')" data-testid="button-edit-recent-${key}">✏️</button>
+                            <button class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="renewCard('${key}')" data-testid="button-renew-recent-${key}">🔄</button>
+                            <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="deleteCard('${key}')" data-testid="button-delete-recent-${key}">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render ESP32 connection status
+        function renderESP32Status(devices) {
+            const container = document.getElementById('esp32StatusContainer');
+            if (!container) return;
+
+            const deviceArray = Object.entries(devices);
+            
+            if (deviceArray.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><p>No ESP32 devices connected</p></div>';
+                return;
+            }
+
+            const now = Math.floor(Date.now() / 1000);
+            container.innerHTML = deviceArray.map(([deviceId, device]) => {
+                const isOnline = device.state === 'online' && (now - (device.lastHeartbeat || 0)) < 60;
+                const statusClass = isOnline ? 'log-granted' : 'log-denied';
+                const statusText = isOnline ? '🟢 Online' : '🔴 Offline';
+                const lastSeen = device.lastHeartbeat ? new Date(device.lastHeartbeat * 1000).toLocaleString() : 'Never';
+
+                return `
+                    <div class="log-entry">
+                        <div class="log-info" style="flex: 1;">
+                            <strong>Device: ${deviceId}</strong>
+                            <div class="log-time">
+                                Last seen: ${lastSeen}<br>
+                                Firmware: ${device.firmwareVersion || 'Unknown'}
+                            </div>
+                        </div>
+                        <span class="log-status ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            const now = Math.floor(Date.now() / 1000);
+            const total = Object.keys(cardsData).length;
+            let active = 0;
+            let expired = 0;
+
+            Object.values(cardsData).forEach(card => {
+                if (card.expiry === 0) {
+                    active++;
+                } else if (now < card.expiry) {
+                    active++;
+                } else {
+                    expired++;
+                }
+            });
+
+            document.getElementById('totalCards').textContent = total;
+            document.getElementById('activeCards').textContent = active;
+            document.getElementById('expiredCards').textContent = expired;
+            
+            const recentLogs = logsData.filter(log => {
+                const logTime = log.timestamp || 0;
+                return (now - logTime) < 86400;
+            }).length;
+            document.getElementById('recentAccess').textContent = recentLogs;
+        }
+
+        // Modal functions
+        function openAddCardModal() {
+            document.getElementById('modalTitle').textContent = 'Add New Card';
+            document.getElementById('cardUID').value = '';
+            document.getElementById('cardName').value = '';
+            document.getElementById('expiryDate').value = '';
+            document.getElementById('editCardKey').value = '';
+            document.querySelector('input[name="expiryType"][value="never"]').checked = true;
+            document.querySelector('input[name="timeRestriction"][value="none"]').checked = true;
+            document.getElementById('startTime').value = '09:00';
+            document.getElementById('endTime').value = '18:00';
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                document.getElementById('day' + day).checked = true;
+            });
+            toggleExpiryDate();
+            toggleTimeRestriction();
+            document.getElementById('cardModal').classList.add('active');
+        }
+
+        function editCard(key) {
+            const card = cardsData[key];
+            document.getElementById('modalTitle').textContent = 'Edit Card';
+            document.getElementById('cardUID').value = card.uid;
+            document.getElementById('cardName').value = card.name;
+            document.getElementById('editCardKey').value = key;
+            
+            if (card.expiry === 0) {
+                document.querySelector('input[name="expiryType"][value="never"]').checked = true;
+            } else {
+                document.querySelector('input[name="expiryType"][value="date"]').checked = true;
+                document.getElementById('expiryDate').value = new Date(card.expiry * 1000).toISOString().split('T')[0];
+            }
+            toggleExpiryDate();
+            
+            if (card.timeRestriction && card.timeRestriction.enabled) {
+                document.querySelector('input[name="timeRestriction"][value="custom"]').checked = true;
+                document.getElementById('startTime').value = card.timeRestriction.startTime || '09:00';
+                document.getElementById('endTime').value = card.timeRestriction.endTime || '18:00';
+                
+                const allowedDays = card.timeRestriction.allowedDays || [0,1,2,3,4,5,6];
+                ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((day, index) => {
+                    document.getElementById('day' + day).checked = allowedDays.includes(index);
+                });
+            } else {
+                document.querySelector('input[name="timeRestriction"][value="none"]').checked = true;
+            }
+            toggleTimeRestriction();
+            
+            document.getElementById('cardModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('cardModal').classList.remove('active');
+        }
+
+        function toggleExpiryDate() {
+            const isNever = document.querySelector('input[name="expiryType"]:checked').value === 'never';
+            document.getElementById('expiryDateGroup').style.display = isNever ? 'none' : 'block';
+        }
+
+        function toggleTimeRestriction() {
+            const isCustom = document.querySelector('input[name="timeRestriction"]:checked').value === 'custom';
+            document.getElementById('timeRestrictionGroup').style.display = isCustom ? 'block' : 'none';
+        }
+
+        function saveCard(event) {
+            event.preventDefault();
+            if (!db) {
+                showToast('Firebase not connected', 'error');
+                return;
+            }
+
+            const uid = document.getElementById('cardUID').value.trim().toUpperCase();
+            const name = document.getElementById('cardName').value.trim();
+            const expiryType = document.querySelector('input[name="expiryType"]:checked').value;
+            const editKey = document.getElementById('editCardKey').value;
+            
+            let expiry = 0;
+            if (expiryType === 'date') {
+                const dateValue = document.getElementById('expiryDate').value;
+                if (!dateValue) {
+                    showToast('Please select an expiry date', 'error');
+                    return;
+                }
+                const date = new Date(dateValue);
+                date.setHours(23, 59, 59, 999);
+                expiry = Math.floor(date.getTime() / 1000);
+            }
+
+            const timeRestrictionType = document.querySelector('input[name="timeRestriction"]:checked').value;
+            let timeRestriction = { enabled: false };
+            
+            if (timeRestrictionType === 'custom') {
+                const startTime = document.getElementById('startTime').value;
+                const endTime = document.getElementById('endTime').value;
+                
+                const allowedDays = [];
+                ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach((day, index) => {
+                    if (document.getElementById('day' + day).checked) {
+                        allowedDays.push(index);
+                    }
+                });
+                
+                if (allowedDays.length === 0) {
+                    showToast('Please select at least one day', 'error');
+                    return;
+                }
+                
+                timeRestriction = {
+                    enabled: true,
+                    startTime: startTime,
+                    endTime: endTime,
+                    allowedDays: allowedDays
+                };
+            }
+
+            // Add createdAt timestamp for new cards
+            const cardData = { 
+                uid, 
+                name, 
+                expiry, 
+                timeRestriction,
+                createdAt: editKey ? (cardsData[editKey]?.createdAt || Date.now()) : Date.now()
+            };
+
+            if (editKey) {
+                db.ref('rfid/cards/' + editKey).set(cardData).then(() => {
+                    showToast('Card updated successfully!', 'success');
+                    closeModal();
+                }).catch((error) => {
+                    showToast('Error: ' + error.message, 'error');
+                });
+            } else {
+                db.ref('rfid/cards').push(cardData).then(() => {
+                    showToast('Card added successfully!', 'success');
+                    closeModal();
+                }).catch((error) => {
+                    showToast('Error: ' + error.message, 'error');
+                });
+            }
+        }
+
+        function deleteCard(key) {
+            if (!confirm('Delete this card permanently?')) return;
+            
+            if (!db) {
+                showToast('Firebase not connected', 'error');
+                return;
+            }
+
+            db.ref('rfid/cards/' + key).remove().then(() => {
+                showToast('Card deleted!', 'success');
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+            });
+        }
+
+        function renewCard(key) {
+            const card = cardsData[key];
+            const now = new Date();
+            const currentExpiry = card.expiry > 0 ? new Date(card.expiry * 1000) : now;
+            
+            if (currentExpiry < now) currentExpiry.setTime(now.getTime());
+            
+            currentExpiry.setMonth(currentExpiry.getMonth() + 1);
+            const newExpiry = Math.floor(currentExpiry.getTime() / 1000);
+
+            db.ref('rfid/cards/' + key).update({ expiry: newExpiry }).then(() => {
+                showToast('Card renewed for 1 month!', 'success');
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Render logs with filters
+        function renderLogs() {
+            const container = document.getElementById('logsContainer');
+            
+            if (filteredLogsData.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No logs match the filters</p></div>';
+                return;
+            }
+
+            container.innerHTML = filteredLogsData.map(log => {
+                const date = new Date(log.timestamp * 1000);
+                const statusClass = log.granted ? 'log-granted' : 'log-denied';
+                const statusText = log.granted ? '✅ Granted' : '❌ Denied';
+                
+                return `
+                    <div class="log-entry">
+                        <div class="log-info">
+                            <strong>${log.cardName || 'Unknown'}</strong> - <code style="font-size: 0.85rem;">${log.uid}</code>
+                            <div class="log-time">${date.toLocaleString()}</div>
+                        </div>
+                        <span class="log-status ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterLogs() {
+            const statusFilter = document.getElementById('logStatusFilter').value;
+            const dateFrom = document.getElementById('logDateFrom').value;
+            const dateTo = document.getElementById('logDateTo').value;
+            
+            filteredLogsData = logsData.filter(log => {
+                let matchesStatus = true;
+                if (statusFilter === 'granted') matchesStatus = log.granted === true;
+                if (statusFilter === 'denied') matchesStatus = log.granted === false;
+                
+                let matchesDate = true;
+                if (dateFrom || dateTo) {
+                    const logDate = new Date(log.timestamp * 1000);
+                    logDate.setHours(0, 0, 0, 0);
+                    
+                    if (dateFrom) {
+                        const fromDate = new Date(dateFrom);
+                        matchesDate = logDate >= fromDate;
+                    }
+                    
+                    if (dateTo && matchesDate) {
+                        const toDate = new Date(dateTo);
+                        matchesDate = logDate <= toDate;
+                    }
+                }
+                
+                return matchesStatus && matchesDate;
+            });
+            
+            renderLogs();
+        }
+
+        function clearLogFilters() {
+            document.getElementById('logStatusFilter').value = 'all';
+            document.getElementById('logDateFrom').value = '';
+            document.getElementById('logDateTo').value = '';
+            filteredLogsData = [...logsData];
+            renderLogs();
+            showToast('Filters cleared', 'info');
+        }
+
+        function clearLogs() {
+            if (!confirm('Clear all access logs permanently?')) return;
+            
+            if (!db) {
+                showToast('Firebase not connected', 'error');
+                return;
+            }
+
+            db.ref('rfid/logs').remove().then(() => {
+                logsData = [];
+                filteredLogsData = [];
+                renderLogs();
+                showToast('Logs cleared!', 'success');
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+            });
+        }
+
+        // Emergency Unlock
+        function triggerEmergencyUnlock() {
+            if (!db) {
+                showToast('Firebase not connected!', 'error');
+                return;
+            }
+
+            if (!confirm('🚨 EMERGENCY UNLOCK\n\nRemotely unlock door for 3 seconds?\n\nConfirm?')) return;
+
+            const unlockBtn = event.target.closest('.emergency-unlock-btn');
+            const statusDiv = document.getElementById('unlockStatus');
+            
+            unlockBtn.disabled = true;
+            unlockBtn.style.opacity = '0.6';
+            statusDiv.textContent = '⏳ Sending unlock command...';
+            statusDiv.style.color = '#f39c12';
+
+            db.ref('rfid/unlock').set({
+                triggered: true,
+                timestamp: Math.floor(Date.now() / 1000),
+                source: 'Web Admin Panel'
+            }).then(() => {
+                showToast('🔓 Unlock command sent!', 'success');
+                statusDiv.textContent = '✅ Door unlocked! (3 seconds)';
+                statusDiv.style.color = '#2ecc71';
+
+                setTimeout(() => {
+                    db.ref('rfid/unlock').set({ triggered: false });
+                    unlockBtn.disabled = false;
+                    unlockBtn.style.opacity = '1';
+                    statusDiv.textContent = 'Click button to remotely unlock door (3 seconds)';
+                    statusDiv.style.color = '#999';
+                }, 5000);
+
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+                unlockBtn.disabled = false;
+                unlockBtn.style.opacity = '1';
+            });
+        }
+
+        // Trigger Menu Mode
+        function triggerMenuMode() {
+            if (!db) {
+                showToast('Firebase not connected!', 'error');
+                return;
+            }
+
+            if (!confirm('📋 OPEN MENU\n\nRemotely open settings menu on ESP32?\n\nConfirm?')) return;
+
+            const menuBtn = document.querySelector('[data-testid="button-open-menu"]');
+            const statusDiv = document.getElementById('menuStatus');
+            
+            menuBtn.disabled = true;
+            menuBtn.style.opacity = '0.6';
+            statusDiv.textContent = '⏳ Opening menu...';
+            statusDiv.style.color = '#f39c12';
+
+            db.ref('rfid/menuMode').set({
+                triggered: true,
+                closeTriggered: false,
+                timestamp: Math.floor(Date.now() / 1000),
+                source: 'Web Admin Panel'
+            }).then(() => {
+                showToast('📋 Menu opened!', 'success');
+                statusDiv.textContent = '✅ Menu activated!';
+                statusDiv.style.color = '#2ecc71';
+
+                setTimeout(() => {
+                    db.ref('rfid/menuMode').update({ triggered: false });
+                    menuBtn.disabled = false;
+                    menuBtn.style.opacity = '1';
+                    statusDiv.textContent = 'Open device menu remotely for settings';
+                    statusDiv.style.color = '#999';
+                }, 3000);
+
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+                menuBtn.disabled = false;
+                menuBtn.style.opacity = '1';
+            });
+        }
+
+        // Trigger Close Menu Mode
+        function triggerCloseMenu() {
+            if (!db) {
+                showToast('Firebase not connected!', 'error');
+                return;
+            }
+
+            if (!confirm('🚪 CLOSE MENU\n\nReturn ESP32 to scan mode?\n\nConfirm?')) return;
+
+            const closeBtn = document.querySelector('[data-testid="button-close-menu"]');
+            const statusDiv = document.getElementById('closeMenuStatus');
+            
+            closeBtn.disabled = true;
+            closeBtn.style.opacity = '0.6';
+            statusDiv.textContent = '⏳ Closing menu...';
+            statusDiv.style.color = '#f39c12';
+
+            db.ref('rfid/menuMode').update({
+                triggered: false,
+                closeTriggered: true,
+                timestamp: Math.floor(Date.now() / 1000),
+                source: 'Web Admin Panel'
+            }).then(() => {
+                showToast('🚪 Menu closed!', 'success');
+                statusDiv.textContent = '✅ Returned to scan mode!';
+                statusDiv.style.color = '#2ecc71';
+
+                setTimeout(() => {
+                    db.ref('rfid/menuMode').update({ closeTriggered: false });
+                    closeBtn.disabled = false;
+                    closeBtn.style.opacity = '1';
+                    statusDiv.textContent = 'Return device to scan mode remotely';
+                    statusDiv.style.color = '#999';
+                }, 3000);
+
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+                closeBtn.disabled = false;
+                closeBtn.style.opacity = '1';
+            });
+        }
+
+        // Activate Registration Mode
+        function activateRegisterMode() {
+            if (!db) {
+                showToast('Firebase not connected!', 'error');
+                return;
+            }
+
+            if (!confirm('📝 REGISTRATION MODE\n\nActivate registration mode on ESP32?\nDevice will wait for card scan (30s timeout).\n\nConfirm?')) return;
+
+            const btn = document.getElementById('activateRegisterBtn');
+            const statusDiv = document.getElementById('registerStatus');
+            
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            statusDiv.style.display = 'block';
+
+            db.ref('rfid/registerMode').set({
+                triggered: true,
+                timestamp: Math.floor(Date.now() / 1000),
+                source: 'Web Admin Panel'
+            }).then(() => {
+                showToast('📝 Registration mode activated!', 'success');
+
+                setTimeout(() => {
+                    db.ref('rfid/registerMode').set({ triggered: false });
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    statusDiv.style.display = 'none';
+                }, 32000);
+
+            }).catch((error) => {
+                showToast('Error: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                statusDiv.style.display = 'none';
+            });
+        }
+
+        // Import/Export
+        function exportData() {
+            if (!db) {
+                showToast('Firebase not connected!', 'error');
+                return;
+            }
+
+            const dataStr = JSON.stringify(cardsData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `rfid-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Backup downloaded!', 'success');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!db) {
+                        showToast('Firebase not connected!', 'error');
+                        return;
+                    }
+
+                    db.ref('rfid/cards').set(data).then(() => {
+                        showToast('Data imported successfully!', 'success');
+                    }).catch((error) => {
+                        showToast('Import failed: ' + error.message, 'error');
+                    });
+                } catch (error) {
+                    showToast('Invalid JSON file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Drag & Drop for file upload
+        const uploadArea = document.getElementById('uploadArea');
+        const fileUpload = document.getElementById('fileUpload');
+
+        uploadArea.addEventListener('click', () => fileUpload.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileUpload.files = files;
+                handleFileUpload({ target: { files: files } });
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initializeFirebase();
+        });
+    </script>
+</body>
+</html>
